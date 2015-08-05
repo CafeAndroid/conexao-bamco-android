@@ -1,0 +1,40 @@
+public void logorAction(){
+           User user = new User();
+           user.setEmail(labelEmail.getText().toString());
+           user.setPassword(labelPassword.getText().toString());
+
+           final ArrayList<NameValuePair> parametros = new ArrayList<NameValuePair>();
+           parametros.add(new BasicNameValuePair("email", user.getEmail()));
+           parametros.add(new BasicNameValuePair("password",user.getPassword()));
+           handler = new Handler() {
+               @Override
+               public void handleMessage(Message msg) {
+                   Toast.makeText(context,"ok, mensagem do handler", Toast.LENGTH_SHORT).show();
+               }
+           };
+           try {
+               new Thread(new Runnable() {
+                   @Override
+                   public void run() {
+                       Message message = new Message();
+                       try {
+                           String respostaPost = ConexaoHttpClient.executaHttpPost("http://127.0.0.1:80/ponttus-network/login.php", parametros);
+                           respostaPost = respostaPost.replaceAll("\n", "");
+                           respostaPost = respostaPost.replaceAll("\t", "");
+                           if(respostaPost.trim().equalsIgnoreCase(LOGIN_VERIFICADOR)){
+                              logar = true;
+                           }else{
+                               logar = false;
+                           }
+                       } catch (Exception e) {
+                           Log.e("PHP", "Exception Thread: " + e.getMessage().toString());
+                       }
+                       handler.sendMessage(message);
+
+                   }
+               }).start();
+
+           } catch (Exception e) {
+               Log.e("PHP", "Exception salvarPosicao catch: " + e.getMessage().toString());
+           }
+       }
